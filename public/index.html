@@ -9,10 +9,10 @@
   <link rel="icon" href="img/favicon-cupcake-claro-96.png" type="image/png" sizes="96x96">
   <link rel="icon" href="img/favicon-cupcake-claro-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="img/logo-dulce-deleite.png">
-  <link rel="stylesheet" href="css/style.css?v=mobile-oct28-r6">
+  <link rel="stylesheet" href="css/style.css?v=promos4-nov19">
   <script src="js/config.js" defer></script>
   <script src="js/productos.js?v=brownies-oct28-r5" defer></script>
-  <script src="js/script.js" defer></script>
+  <script src="js/script.js?v=promos3-nov19" defer></script>
 </head>
 <body>
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -31,11 +31,17 @@
   <header class="site-header">
     <nav class="nav container" aria-label="Navegación principal">
       <a class="brand brand-with-logo" href="#inicio" aria-label="Dulce Deleite, inicio"><img class="brand-logo" src="img/logo-dulce-deleite.png" alt="Logo original de Dulce Deleite, pastelería" width="1254" height="1254"><span class="brand-text"><span class="brand-name">Dulce Deleite</span><span class="brand-caption">PASTELERÍA ARTESANAL</span></span></a>
-      <div class="nav-links"><a href="#productos">Productos</a><a href="#catering">Catering</a><a href="#como-pedir">Cómo pedir</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></div>
+      <div class="nav-links"><a href="#ofertas" data-offers-link hidden>Promos</a><a href="#productos">Productos</a><a href="#catering">Catering</a><a href="#como-pedir">Cómo pedir</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></div>
       <a class="nav-cart" href="#carrito" aria-label="Ver carrito"><svg class="icon"><use href="#i-bag"/></svg><span class="cart-word">Tu carrito</span><span class="cart-count" data-cart-count>0</span></a>
     </nav>
   </header>
   <main>
+    <section class="offers-section" id="ofertas" aria-labelledby="offers-title" hidden>
+      <div class="container">
+        <div class="offers-heading"><div><p class="eyebrow"><span class="little-dot"></span> APROVECHÁ AHORA</p><h2 id="offers-title">Promos del <em>finde</em></h2></div><p>Por tiempo limitado o hasta agotar stock.</p></div>
+        <div class="offers-grid" id="offers-grid"></div>
+      </div>
+    </section>
     <section class="hero container" id="inicio" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow"><span class="little-dot"></span> CASERO. ARTESANAL. HECHO CON AMOR.</p>

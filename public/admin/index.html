@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#fcf7f0">
+  <title>Administración · Dulce Deleite</title>
+  <link rel="icon" href="../img/favicon-cupcake-claro-96.png" type="image/png" sizes="96x96">
+  <link rel="stylesheet" href="../css/style.css?v=promos4-nov19">
+  <link rel="stylesheet" href="admin.css?v=5">
+  <script src="../js/productos.js" defer></script>
+  <script src="admin.js?v=6" defer></script>
+</head>
+<body class="admin">
+  <header class="admin-header">
+    <div class="admin-wrap admin-bar">
+      <a class="brand brand-with-logo" href="../" aria-label="Ver la web de Dulce Deleite"><img class="brand-logo" src="../img/logo-dulce-deleite.png" alt="" width="1254" height="1254"><span class="brand-text"><span class="brand-name">Dulce Deleite</span><span class="brand-caption">ADMINISTRACIÓN</span></span></a>
+      <div class="admin-bar-actions"><a class="button button-outline" href="../" target="_blank" rel="noopener">Ver la web</a><button class="text-button" id="logout" type="button" hidden>Salir</button></div>
+    </div>
+    <nav class="admin-wrap admin-tabs" id="tabs" aria-label="Secciones del panel" hidden>
+      <button type="button" data-tab="productos" aria-pressed="true">Productos y precios</button>
+      <button type="button" data-tab="ofertas" aria-pressed="false">Ofertas</button>
+    </nav>
+  </header>
+
+  <main class="admin-wrap">
+    <section class="admin-login" id="login-view">
+      <p class="eyebrow">PANEL DE ADMINISTRACIÓN</p>
+      <h1>¡Hola!</h1>
+      <p id="login-intro">Entrá para administrar la web.</p>
+      <div class="admin-card">
+        <div class="google-box" id="google-box" hidden>
+          <div id="google-button"></div>
+          <p class="hint">Solo pueden entrar los mails autorizados.</p>
+        </div>
+        <p class="admin-error" id="login-error" role="alert" hidden></p>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCTOS ===================== -->
+    <section id="productos-view" hidden>
+      <div class="admin-title">
+        <div><p class="eyebrow">CATÁLOGO</p><h1>Productos y precios</h1><p>Cambiá precios acá mismo y tocá «Guardar precios». Para cambiar nombre, foto o presentaciones, tocá «Editar».</p></div>
+        <button class="button button-primary" id="new-product" type="button">+ Nuevo producto</button>
+      </div>
+      <p class="admin-notice" id="catalog-notice" hidden>Estás viendo el catálogo original de la web. Cuando guardes el primer cambio, el catálogo pasa a manejarse desde este panel.</p>
+
+      <form class="admin-card item-form" id="product-form" hidden novalidate>
+        <h2 id="product-form-title">Nuevo producto</h2>
+        <div class="field-grid">
+          <label class="span-2"><span>Nombre <span class="req">*</span></span><input name="nombre" maxlength="80" required placeholder="Ej.: Torta de chocolate"></label>
+          <label>Categoría<select name="categoria"><option value="tortas">Tortas y tartas</option><option value="dulces">Dulces por peso</option><option value="salados">Salados</option></select></label>
+          <div class="checks">
+            <label class="check"><input name="visible" type="checkbox" checked> Mostrar en la web</label>
+            <label class="check"><input name="favorito" type="checkbox"> Aparece en «Favoritos»</label>
+          </div>
+        </div>
+
+        <fieldset class="box-field">
+          <legend>Presentaciones y precios</legend>
+          <p class="hint">Cada presentación es una opción para elegir (tamaño, peso, docena…). Dejá el precio vacío para que diga «A consultar».</p>
+          <div class="variant-list" id="variant-list"></div>
+          <div class="variant-tools">
+            <button class="button button-outline small" type="button" id="add-variant">+ Agregar presentación</button>
+            <span class="hint">Rellenar con:</span>
+            <button class="chip" type="button" data-preset="tamanos">Chica · Mediana · Grande</button>
+            <button class="chip" type="button" data-preset="pesos">1 kg · ½ kg · ¼ kg</button>
+            <button class="chip" type="button" data-preset="docena">1 docena</button>
+            <button class="chip" type="button" data-preset="unidad">1 unidad</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="box-field">
+          <legend>Sabores <span class="opt">(opcional)</span></legend>
+          <label>Escribilos separados por coma<input name="sabores" maxlength="400" placeholder="Ej.: Carne, Pollo, Jamón y queso"></label>
+        </fieldset>
+
+        <fieldset class="box-field offer-box" id="product-offer">
+          <legend>Oferta <span class="opt">(opcional)</span></legend>
+          <label class="check"><input name="enOferta" type="checkbox"> Poner este producto en oferta (aparece arriba de todo en la web)</label>
+          <div class="field-grid" data-offer-fields hidden>
+            <label><span>Precio de oferta <span class="req">*</span></span><span class="money-input"><span>$</span><input name="ofertaPrecio" inputmode="numeric" placeholder="15000"></span></label>
+            <label><span>Precio anterior <span class="opt">(se muestra tachado)</span></span><span class="money-input"><span>$</span><input name="ofertaAnterior" inputmode="numeric" placeholder="18000"></span></label>
+            <label class="span-2"><span>Detalle <span class="opt">(opcional, ej.: «Tamaño grande» o «Solo este fin de semana»)</span></span><input name="ofertaDetalle" maxlength="240"></label>
+            <label><span>Válida hasta <span class="opt">(opcional)</span></span><input name="ofertaHasta" type="date"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="box-field photo-field">
+          <legend>Foto</legend>
+          <div class="photo-choice">
+            <label><input type="radio" name="fotoTipo" value="web" checked> Una foto que ya está en la web</label>
+            <label><input type="radio" name="fotoTipo" value="subir"> Subir una foto nueva</label>
+            <label><input type="radio" name="fotoTipo" value="ninguna"> Sin foto</label>
+          </div>
+          <div class="photo-row">
+            <div class="photo-preview" data-preview></div>
+            <div class="photo-inputs">
+              <select data-web-photo aria-label="Foto de la web"></select>
+              <button class="button button-outline" type="button" data-pick hidden>Elegir foto…</button>
+              <p class="hint" data-upload-hint hidden>Podés sacarla con el celular. Se achica sola para que la web cargue rápido.</p>
+            </div>
+          </div>
+        </fieldset>
+        <p class="admin-error" data-form-error role="alert" hidden></p>
+        <div class="form-actions"><button class="text-button" type="button" data-cancel>Cancelar</button><button class="button button-primary" type="submit" data-save>Guardar producto</button></div>
+      </form>
+
+      <div class="list-toolbar">
+        <select id="product-filter" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option><option value="tortas">Tortas y tartas</option><option value="dulces">Dulces por peso</option><option value="salados">Salados</option><option value="ocultos">Ocultos</option></select>
+        <input id="product-search" type="search" placeholder="Buscar producto…" aria-label="Buscar producto">
+      </div>
+      <p class="admin-status" id="products-status" role="status"></p>
+      <div class="admin-list" id="product-list"></div>
+      <div class="save-bar" id="price-bar" hidden><span id="price-bar-text">Cambiaste precios.</span><button class="text-button" type="button" id="discard-prices">Descartar</button><button class="button button-primary" type="button" id="save-prices">Guardar precios</button></div>
+    </section>
+
+    <!-- ===================== OFERTAS ===================== -->
+    <section id="ofertas-view" hidden>
+      <div class="admin-title">
+        <div><p class="eyebrow">OFERTAS</p><h1>Ofertas de la web</h1><p>Lo que agregues acá aparece arriba de todo en la página. La más nueva queda primera.</p></div>
+        <button class="button button-primary" id="new-offer" type="button">+ Nueva oferta</button>
+      </div>
+
+      <form class="admin-card item-form" id="offer-form" hidden novalidate>
+        <h2 id="offer-form-title">Nueva oferta</h2>
+        <div class="field-grid">
+          <label class="span-2"><span>Título <span class="req">*</span></span><input name="titulo" maxlength="80" required placeholder="Ej.: 2 docenas de alfajores de maicena"></label>
+          <label class="span-2"><span>Qué incluye <span class="opt">(opcional — una línea por cada cosa, se muestra como lista)</span></span><textarea name="descripcion" maxlength="240" rows="3" placeholder="¼ kg de alfajores de maicena&#10;¼ kg de alfajores de chocolate"></textarea></label>
+          <label><span>Precio de oferta <span class="opt">($, vacío = a consultar)</span></span><input name="precio" inputmode="numeric" placeholder="15000"></label>
+          <label><span>Precio anterior <span class="opt">(opcional, se muestra tachado)</span></span><input name="precioAnterior" inputmode="numeric" placeholder="18000"></label>
+          <label><span>Válida hasta <span class="opt">(opcional)</span></span><input name="hasta" type="date"></label>
+          <label class="check"><input name="activa" type="checkbox" checked> Mostrar en la web</label>
+        </div>
+        <fieldset class="box-field photo-field">
+          <legend>Foto</legend>
+          <div class="photo-choice">
+            <label><input type="radio" name="fotoTipo" value="producto" checked> De productos del catálogo (hasta 3)</label>
+            <label><input type="radio" name="fotoTipo" value="subir"> Subir una foto</label>
+            <label><input type="radio" name="fotoTipo" value="ninguna"> Sin foto</label>
+          </div>
+          <div class="photo-row">
+            <div class="photo-preview" data-preview></div>
+            <div class="photo-inputs">
+              <div class="photo-selects" data-product-box>
+                <select data-product-photo aria-label="Foto 1: producto del catálogo"></select>
+                <select data-extra-photo aria-label="Foto 2 (opcional)"></select>
+                <select data-extra-photo aria-label="Foto 3 (opcional)"></select>
+              </div>
+              <button class="button button-outline" type="button" data-pick hidden>Elegir foto…</button>
+            </div>
+          </div>
+        </fieldset>
+        <p class="admin-error" data-form-error role="alert" hidden></p>
+        <div class="form-actions"><button class="text-button" type="button" data-cancel>Cancelar</button><button class="button button-primary" type="submit" data-save>Publicar oferta</button></div>
+      </form>
+
+      <p class="admin-status" id="offers-status" role="status"></p>
+      <div class="admin-list" id="offer-list"></div>
+      <div class="admin-empty" id="offers-empty" hidden><h3>Todavía no hay ofertas.</h3><p>Tocá «Nueva oferta» para agregar la primera. Mientras no haya ninguna, la sección no se muestra en la web.</p></div>
+    </section>
+    <input type="file" id="photo-file" accept="image/*" hidden>
+  </main>
+</body>
+</html>

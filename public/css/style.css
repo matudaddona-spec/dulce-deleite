@@ -94,3 +94,35 @@
   .underlined-link,.footer-social a{min-height:44px}
   .contact-phone,.site-footer>a:last-child{display:inline-flex;align-items:center;min-height:44px}
 }
+
+/* Ofertas (se cargan desde /admin y aparecen arriba de todo) */
+.offers-section{background:var(--blush);border-bottom:1px solid var(--line);padding-block:44px 48px}
+.offers-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
+.offers-heading .eyebrow{margin-bottom:10px}
+.offers-heading h2{font-family:var(--serif);font-weight:400;font-size:38px;line-height:1.15;margin:0;letter-spacing:-.8px}
+.offers-heading h2 em{color:var(--clay)}
+.offers-heading>p{margin:0;color:var(--muted);font-size:14px}
+.offers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:20px}
+.offer-card{display:grid;grid-template-columns:42% 1fr;min-width:0;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.offer-photo{position:relative;min-height:190px;background:#efe6db;overflow:hidden}
+.offer-photo img,.offer-photo .photo-placeholder{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.offer-tag{position:absolute;top:10px;left:10px;padding:4px 9px;background:var(--clay);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;border-radius:3px}
+.offer-body{display:flex;flex-direction:column;padding:16px 16px 16px 18px;min-width:0}
+.offer-card h3{font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.2;margin:0 0 6px}
+.offer-description{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.offer-until{margin:8px 0 0;font-size:11px;letter-spacing:.04em;color:var(--clay);font-weight:600}
+.offer-prices{display:flex;flex-direction:column;line-height:1.2}
+.offer-before{color:var(--muted);font-size:13px}
+.offer-card .product-bottom{padding-top:14px;align-items:flex-end}
+@media(max-width:800px){.offers-section{padding-block:30px 34px}.offers-heading{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:18px}.offers-heading h2{font-size:30px}}
+@media(max-width:800px){.offers-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;gap:14px;margin-inline:-16px;padding:2px 16px 8px;scrollbar-width:thin}.offers-grid .offer-card{flex:0 0 min(82%,340px);scroll-snap-align:start;grid-template-columns:1fr;grid-template-rows:auto 1fr}.offers-grid .offer-card:only-child{flex-basis:100%}.offer-photo{min-height:0;aspect-ratio:1.9}.offer-card h3{font-size:19px}}
+.offer-includes{margin:2px 0 0;padding:0;list-style:none;color:var(--ink);font-size:13.5px;line-height:1.4}
+.offer-includes li{position:relative;padding-left:14px;margin-top:4px}
+.offer-includes li::before{content:"";position:absolute;left:2px;top:.55em;width:5px;height:5px;border-radius:50%;background:var(--clay)}
+.offer-collage{background:var(--paper)}
+.offer-photo.offer-collage img{inset:auto;top:0;width:calc(50% - 1px);height:100%}
+.offer-collage img:nth-child(1){left:0}
+.collage-2 img:nth-child(2){right:0}
+.offer-photo.collage-3 img:nth-child(1){width:calc(55% - 1px)}
+.offer-photo.collage-3 img:nth-child(2),.offer-photo.collage-3 img:nth-child(3){right:0;width:calc(45% - 1px);height:calc(50% - 1px)}
+.offer-photo.collage-3 img:nth-child(3){top:auto;bottom:0}

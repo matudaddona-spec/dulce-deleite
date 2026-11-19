@@ -1,9 +1,9 @@
 (() => {
   'use strict';
   const config = window.PASTELERIA;
-  const products = window.PRODUCTOS;
-  const byId = new Map(products.map(product => [product.id, product]));
-  const categories = { tortas:'TORTAS Y TARTAS', dulces:'DULCES POR PESO', salados:'SALADOS' };
+  const products = [...window.PRODUCTOS];
+  const byId = new Map();
+  const categories = { tortas:'TORTAS Y TARTAS', dulces:'DULCES POR PESO', salados:'SALADOS', ofertas:'OFERTA' };
   const money = value => new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }).format(value);
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const grid = document.querySelector('#product-grid');
@@ -19,6 +19,7 @@
   let notes = '';
   let cartInView = false;
   let toastTimer;
+  let loaded = false;
 
   function element(tag, className, text) {
     const node = document.createElement(tag);
@@ -37,6 +38,7 @@
   }
   function key(item) { return [item.id, item.variantId, item.flavor || ''].join('|'); }
   function save() {
+    if (!loaded) return;
     try { localStorage.setItem(config.storageKey, JSON.stringify({ items:cart, notes })); } catch { /* El pedido sigue disponible en esta visita. */ }
   }
   function load() {
@@ -44,7 +46,7 @@
       const stored = JSON.parse(localStorage.getItem(config.storageKey) || '{}');
       if (!stored || typeof stored !== 'object' || !Array.isArray(stored.items)) return;
       const merged = new Map();
-      for (const item of stored.items.slice(0,200)) {
+      for (const item of [...stored.items.slice(0,200),...cart]) {
         if (!item || typeof item !== 'object') continue;
         const product = byId.get(item.id);
         if (!product || !product.variantes.some(variant => variant.id === item.variantId)) continue;
@@ -68,7 +70,7 @@
   function picture(product, thumbnail = false) {
     if (product.foto) {
       const img = element('img', thumbnail ? 'cart-thumb' : '');
-      img.src = 'img/productos/' + product.foto;
+      img.src = product.fotoUrl || 'img/productos/' + product.foto;
       img.alt = thumbnail ? '' : product.nombre;
       img.loading = 'lazy';
       if (!thumbnail) { img.width = 560; img.height = 400; }
@@ -92,6 +94,7 @@
   function renderProducts() {
     const query = normalize(search.value);
     const visible = products.filter(product => {
+      if (product.categoria === 'ofertas') return false;
       const categoryMatches = category === 'todos' || (category === 'destacados' ? product.favorito : product.categoria === category);
       const haystack = normalize(product.nombre + ' ' + categories[product.categoria] + ' ' + (product.sabores || []).join(' '));
       return categoryMatches && (!query || haystack.includes(query));
@@ -148,15 +151,106 @@
         label.append(select); options.append(label);
       }
       const bottom = element('div','product-bottom'); bottom.append(price,add);
-      add.addEventListener('click',() => {
-        const next = { id:product.id, variantId:selected.id, flavor, quantity:1 };
-        const existing = cart.find(item => key(item) === key(next));
-        if (existing && existing.quantity >= 99) { announce('Ya tenés 99 de esta presentación en el carrito.'); return; }
-        if (existing) existing.quantity += 1; else cart.push(next);
-        save(); renderCart();
-        announce(`${product.nombre} · ${selected.etiqueta}${flavor ? ' · ' + flavor : ''} agregado al carrito.`);
-      });
+      add.addEventListener('click',() => addToCart(product,selected,flavor));
       updatePrice(); body.append(options,bottom); article.append(photo,body); grid.append(article);
+    });
+  }
+  function addToCart(product, selected, flavor = '') {
+    const next = { id:product.id, variantId:selected.id, flavor, quantity:1 };
+    const existing = cart.find(item => key(item) === key(next));
+    if (existing && existing.quantity >= 99) { announce('Ya tenés 99 de esta presentación en el carrito.'); return; }
+    if (existing) existing.quantity += 1; else cart.push(next);
+    save(); renderCart();
+    announce(`${product.nombre} · ${selected.etiqueta}${flavor ? ' · ' + flavor : ''} agregado al carrito.`);
+  }
+  // Productos y ofertas cargados desde el panel de administración (/admin).
+  // Si no responde, la web usa js/productos.js y se muestra sin ofertas.
+  async function fetchData(path) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(),4000);
+      const response = await fetch(path,{ signal:controller.signal });
+      clearTimeout(timer);
+      return response.ok ? await response.json() : {};
+    } catch { return {}; }
+  }
+  const imageUrl = id => '/api/imagen/' + encodeURIComponent(id);
+  function setProducts(list) {
+    const items = [...list]; // copia: list puede ser el mismo arreglo products
+    products.length = 0;
+    items.forEach(product => {
+      if (product.imagen) product.fotoUrl = imageUrl(product.imagen);
+      if (product.imagen && !product.foto) product.foto = product.imagen;
+      products.push(product);
+    });
+    byId.clear();
+    products.forEach(product => byId.set(product.id,product));
+  }
+  // Fotos de una oferta: la subida, o las de los productos que incluye (hasta 3).
+  function offerPhotos(offer) {
+    if (offer.imagen) return [{ foto:offer.imagen, fotoUrl:imageUrl(offer.imagen) }];
+    const ids = Array.isArray(offer.fotos) && offer.fotos.length ? offer.fotos : [offer.productoId];
+    return ids.map(id => byId.get(id)).filter(base => base && base.foto).slice(0,3).map(base => ({ foto:base.foto, fotoUrl:base.fotoUrl || '' }));
+  }
+  const offerLines = offer => String(offer.descripcion || '').split('\n').map(line => line.trim()).filter(Boolean);
+  function offerProduct(offer) {
+    const photos = offerPhotos(offer);
+    const lines = offerLines(offer);
+    return {
+      id:'oferta-' + offer.id,
+      nombre:'Oferta: ' + offer.titulo,
+      categoria:'ofertas',
+      foto:photos.length ? photos[0].foto : '',
+      fotoUrl:photos.length ? photos[0].fotoUrl : '',
+      fotos:photos,
+      variantes:[{ id:'oferta', etiqueta:lines.length ? lines.join(' + ').slice(0,160) : 'Oferta', precio:Number.isInteger(offer.precio) ? offer.precio : null }],
+      oferta:offer
+    };
+  }
+  function renderOffers(offerProducts) {
+    const section = document.querySelector('#ofertas');
+    const list = document.querySelector('#offers-grid');
+    section.hidden = !offerProducts.length;
+    document.querySelectorAll('[data-offers-link]').forEach(link => { link.hidden = !offerProducts.length; });
+    list.replaceChildren();
+    offerProducts.forEach(product => {
+      const offer = product.oferta;
+      const variant = product.variantes[0];
+      const card = element('article','offer-card');
+      const title = element('h3','',offer.titulo);
+      title.id = 'title-' + product.id;
+      card.setAttribute('aria-labelledby',title.id);
+      const photo = element('div','offer-photo' + (product.fotos.length > 1 ? ' offer-collage collage-' + product.fotos.length : ''));
+      if (product.fotos.length > 1) product.fotos.forEach(item => photo.append(picture({ ...item, nombre:offer.titulo })));
+      else photo.append(picture(product));
+      const off = offer.precio && offer.precioAnterior && offer.precioAnterior > offer.precio ? Math.round((1 - offer.precio / offer.precioAnterior) * 100) : 0;
+      photo.append(element('span','offer-tag',off ? `−${off}%` : 'OFERTA'));
+      const body = element('div','offer-body');
+      body.append(title);
+      const lines = offerLines(offer);
+      if (lines.length > 1) {
+        const includes = element('ul','offer-includes');
+        lines.forEach(line => includes.append(element('li','',line)));
+        body.append(includes);
+      } else if (lines.length) body.append(element('p','offer-description',lines[0]));
+      if (offer.hasta) {
+        const [y,m,d] = offer.hasta.split('-');
+        body.append(element('p','offer-until',`Válida hasta el ${d}/${m}/${y}`));
+      }
+      const prices = element('div','offer-prices');
+      if (off) {
+        const before = element('s','offer-before',money(offer.precioAnterior));
+        before.setAttribute('aria-label','Antes ' + money(offer.precioAnterior));
+        prices.append(before);
+      }
+      prices.append(element('strong',variant.precio === null ? 'product-price price-consult' : 'product-price',variant.precio === null ? 'A consultar' : money(variant.precio)));
+      const add = element('button','add-button');
+      add.type = 'button';
+      add.append(icon('bag'),document.createTextNode('Agregar'));
+      add.setAttribute('aria-label','Agregar ' + product.nombre);
+      add.addEventListener('click',() => addToCart(product,variant));
+      const bottom = element('div','product-bottom'); bottom.append(prices,add);
+      body.append(bottom); card.append(photo,body); list.append(card);
     });
   }
   function totals() {
@@ -271,5 +365,14 @@
     const observer = new IntersectionObserver(entries => { cartInView = entries[0].isIntersecting; updateFloatingCart(); },{threshold:0});
     observer.observe(cartSection);
   }
-  load(); notesInput.value = notes; renderProducts(); renderCart();
+  setProducts(products);
+  Promise.all([fetchData('/api/productos'),fetchData('/api/ofertas')]).then(([catalog,offerData]) => {
+    setProducts(Array.isArray(catalog.productos) ? catalog.productos.filter(product => product && product.id && Array.isArray(product.variantes) && product.variantes.length) : products);
+    renderProducts();
+    const offers = Array.isArray(offerData.ofertas) ? offerData.ofertas.slice(0,30) : [];
+    const offerProducts = offers.filter(offer => offer && typeof offer.id === 'string' && offer.titulo).map(offerProduct);
+    offerProducts.forEach(product => { products.push(product); byId.set(product.id,product); });
+    renderOffers(offerProducts);
+    load(); loaded = true; save(); notesInput.value = notes; renderCart();
+  });
 })();

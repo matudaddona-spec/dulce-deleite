@@ -5,3 +5,6 @@ node_modules/
 !.env.example
 .DS_Store
 Thumbs.db
+
+# Clave local del panel (solo para probar en la compu)
+.dev.vars
